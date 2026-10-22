@@ -1,0 +1,31 @@
+name: Check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Test bridge commands and local transport
+        run: node --test test-bridge.cjs test-registry.cjs
+      - name: Test Python client
+        run: python -m unittest discover -p 'test_client.py'
+      - name: Build VSIX and source archive
+        run: python build.py

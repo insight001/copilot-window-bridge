@@ -1,0 +1,27 @@
+{
+  "name": "copilot-window-bridge",
+  "displayName": "Copilot Window Bridge",
+  "description": "Discover open VS Code windows and send local messages to their chats, with queue, steer, and interrupt controls.",
+  "version": "0.2.0",
+  "publisher": "localtools",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/insight001/copilot-window-bridge.git" },
+  "homepage": "https://github.com/insight001/copilot-window-bridge#readme",
+  "bugs": { "url": "https://github.com/insight001/copilot-window-bridge/issues" },
+  "engines": { "vscode": "^1.143.0" },
+  "categories": ["Other"],
+  "main": "./extension.js",
+  "extensionKind": ["ui"],
+  "activationEvents": [
+    "onCommand:copilotWindowBridge.start",
+    "onCommand:copilotWindowBridge.copyConnectionPath",
+    "onCommand:copilotWindowBridge.stop"
+  ],
+  "contributes": {
+    "commands": [
+      { "command": "copilotWindowBridge.start", "title": "Copilot Bridge: Start for This Window" },
+      { "command": "copilotWindowBridge.copyConnectionPath", "title": "Copilot Bridge: Copy Connection File Path" },
+      { "command": "copilotWindowBridge.stop", "title": "Copilot Bridge: Stop for This Window" }
+    ]
+  }
+}

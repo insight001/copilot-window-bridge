@@ -1,0 +1,73 @@
+Copilot Window Bridge: Python client
+
+Requires Python 3.9+ and the adjacent connections.py file; no third-party packages.
+Start the extension separately in each VS Code window you want to control.
+
+LIST WINDOWS AND CONNECTION FILES
+  python send.py list
+  python send.py list --json
+  python send.py list --all
+  python send.py list --directory /absolute/custom/registry --all --json
+
+Default registry: ~/.copilot-window-bridge/connections
+COPILOT_WINDOW_BRIDGE_DIR can override the entire registry directory. Its
+value must be an absolute path and must also be set for the VS Code process
+if the extension should write there. --directory overrides discovery for one
+client invocation. Discovery reads only connection-*.json in that directory,
+without recursion. Listing never sends chat messages and never deletes files.
+
+Default output includes live windows only. --all also reports stale records
+(unreachable, authentication failure or wrong instance ID) and invalid files.
+Human output shows window IDs, workspace names, connection paths and status.
+--json prints a token-free array including folders and version metadata.
+
+SELECT EXACTLY ONE WINDOW
+  python send.py health --window FULL_UUID_OR_UNIQUE_PREFIX
+  python send.py health --workspace "Exact workspace name"
+  python send.py health --connection /path/to/connection-UUID.json
+
+Send always requires --window, --workspace or --connection. Nothing is picked
+automatically. ID prefixes and exact workspace names must match one LIVE
+window; duplicate names or prefixes fail instead of choosing a window.
+Stale duplicates do not block a unique live match. Use a full window ID or an
+exact connection file path to resolve an ambiguity.
+
+SEND MESSAGES
+  python send.py send --window WINDOW_ID "Summarize our progress."
+  python send.py send --workspace "My project" --behavior steer "Focus on the failing test."
+  python send.py send --window WINDOW_ID --behavior interrupt "Stop that task and explain the error."
+  python send.py send --window WINDOW_ID --new "Explain this project's structure."
+  python send.py send --window WINDOW_ID --file prompt.txt
+  printf '%s' 'Explain the test failure.' | python send.py send --window WINDOW_ID --stdin
+
+The default behavior is queue. Queue and steer send normally while idle.
+Interrupt uses Stop and Send; completed file edits or commands are not undone.
+Default inputMode is preserve: the bridge requests that existing composer
+draft text and its attachments stay intact. This needs a compatible recent
+VS Code version. --composer explicitly replaces the draft and submits via
+the composer; existing attachments may accompany the injected message.
+
+LEGACY SYNTAX STILL WORKS
+  python send.py --connection connection.json "Summarize our progress."
+  python send.py --connection connection.json --health
+
+CONNECTION AND DELIVERY DETAILS
+Each window has its own endpoint, bearer token and instance ID. The client
+performs an authenticated health check and verifies that ID immediately
+before a send. A stale or mismatched target prevents any message POST.
+Connection descriptors must be regular files, at most 64 KiB; descriptor
+symlinks are rejected. The only allowed endpoints are explicit-port HTTP
+URLs using literal 127.0.0.1 or ::1. Proxies and redirects are disabled.
+
+Health probes default to a one-second timeout, with up to eight concurrent
+probes for discovery. list --timeout adjusts discovery probes; health --timeout
+adjusts the final selected-window probe. Selection discovery remains one second.
+send --timeout changes the POST timeout (default: 20 seconds).
+Messages are never retried. A dispatch acknowledgement is not proof that
+Copilot has accepted or completed a request. On an uncertain connection error
+or timeout, inspect the target chat before resending to avoid duplicate actions.
+
+Connection files contain bearer tokens; keep the files private. Client listing
+and JSON output omit tokens, escape controls and redact reflected credentials.
+Exit codes: 0 = successful operation; 1 = message HTTP error;
+2 = invalid selection, stale target, local error or network failure.

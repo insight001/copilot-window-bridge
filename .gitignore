@@ -1,0 +1,30 @@
+# Generated distribution packages and build output
+/dist/
+/build/
+*.vsix
+*.zip
+
+# Runtime bridge connections contain local access tokens
+connection.json
+connection-*.json
+connections.json
+connections/*.json
+registry/*.json
+
+# Dependencies, virtual environments, and interpreter caches
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+coverage/
+
+# Local credentials, temporary files, and editor/OS output
+.env
+.env.*
+!.env.example
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
